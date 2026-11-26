@@ -1,0 +1,18 @@
+services:
+  orders:
+    build: ./app/orders
+    environment: { PORT: "3001", PAYMENTS_URL: "http://payments:3002" }
+    ports: ["3001:3001"]
+    depends_on: [payments]
+  payments:
+    build: ./app/payments
+    environment: { PORT: "3002", FAIL_RATE: "0.2" }
+    ports: ["3002:3002"]
+  prometheus:
+    image: prom/prometheus:latest
+    volumes: ["./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml"]
+    ports: ["9090:9090"]
+  grafana:
+    image: grafana/grafana:latest
+    volumes: ["./monitoring/grafana/provisioning:/etc/grafana/provisioning"]
+    ports: ["3000:3000"]

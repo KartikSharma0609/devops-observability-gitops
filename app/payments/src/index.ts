@@ -17,7 +17,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const log = (level: string, msg: string, extra = {}) =>
+const log = (level: string, msg: string, extra: Record<string, unknown> = {}) =>
   console.log(JSON.stringify({ ts: new Date().toISOString(), level, service: "payments", msg, ...extra }));
 
 const FAIL_RATE = Number(process.env.FAIL_RATE ?? 0.1);
