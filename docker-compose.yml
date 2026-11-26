@@ -1,12 +1,12 @@
 services:
   orders:
     build: ./app/orders
-    environment: { PORT: "3001", PAYMENTS_URL: "http://payments:3002" }
+    environment: { OTEL_SERVICE_NAME: "orders", PORT: "3001", PAYMENTS_URL: "http://payments:3002" }
     ports: ["3001:3001"]
     depends_on: [payments]
   payments:
     build: ./app/payments
-    environment: { PORT: "3002", FAIL_RATE: "0.2" }
+    environment: { OTEL_SERVICE_NAME: "payments", PORT: "3002", FAIL_RATE: "0.2" }
     ports: ["3002:3002"]
   prometheus:
     image: prom/prometheus:latest
@@ -16,3 +16,16 @@ services:
     image: grafana/grafana:latest
     volumes: ["./monitoring/grafana/provisioning:/etc/grafana/provisioning"]
     ports: ["3000:3000"]
+  loki:
+    image: grafana/loki:3.0.0
+    ports: ["3100:3100"]
+  promtail:
+    image: grafana/promtail:3.0.0
+    volumes:
+      - ./monitoring/promtail.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment: { COLLECTOR_OTLP_ENABLED: "true" }
+    ports: ["16686:16686", "4318:4318"]
